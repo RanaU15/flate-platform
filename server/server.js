@@ -11,8 +11,8 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 4000;
 const PB_URL = process.env.POCKETBASE_URL || "http://127.0.0.1:8092";
-const PB_EMAIL = process.env.PB_EMAIL || "admin@local.test";
-const PB_PASSWORD = process.env.PB_PASSWORD || "Pb@Scr4p3r#2026!xK";
+const PB_EMAIL = process.env.PB_EMAIL || "admin@test.com";
+const PB_PASSWORD = process.env.PB_PASSWORD || "admin@123";
 
 const pb = new PocketBase(PB_URL);
 pb.autoCancellation(false);

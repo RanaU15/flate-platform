@@ -21,8 +21,8 @@ import requests
 
 # Exclusively use Port 8092
 os.environ["POCKETBASE_URL"] = os.environ.get("POCKETBASE_URL", "http://127.0.0.1:8092")
-os.environ["PB_EMAIL"] = os.environ.get("PB_EMAIL", "admin@local.test")
-os.environ["PB_PASSWORD"] = os.environ.get("PB_PASSWORD", "Pb@Scr4p3r#2026!xK")
+os.environ["PB_EMAIL"] = os.environ.get("PB_EMAIL", "admin@test.com")
+os.environ["PB_PASSWORD"] = os.environ.get("PB_PASSWORD", "admin@123")
 os.environ["COOKIE_FILE"] = os.path.join(os.path.dirname(os.path.abspath(__file__)), "facebook-cookies.json")
 
 import fb_scraper
