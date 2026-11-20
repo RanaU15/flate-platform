@@ -1,0 +1,239 @@
+---
+import DashboardLayout from "../layouts/DashboardLayout.astro";
+---
+
+<DashboardLayout title="Actors - Facebook Groups Scraper" activeNav="actors">
+  <div class="max-w-5xl mx-auto space-y-8">
+    <!-- Actor Header -->
+    <div class="flex items-center justify-between pb-6 border-b border-[#262938]">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-gradient-to-tr from-[#FF7629] to-[#FF9E66] flex items-center justify-center text-white shadow-lg shadow-[#FF7629]/20">
+          <i data-lucide="layers" class="w-7 h-7"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-3">
+            <h1 class="text-xl font-bold text-white">Facebook Groups Scraper</h1>
+            <span class="text-xs bg-emerald-500/10 text-emerald-400 font-mono px-2 py-0.5 rounded border border-emerald-500/20">Production</span>
+          </div>
+          <p class="text-sm text-gray-400 mt-1">Autonomous extractor for public Facebook groups using Python Selenium engine.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <a
+          href="/runs"
+          class="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[#222534] hover:bg-[#2b2f42] text-gray-300 text-xs font-semibold border border-[#2e3347] transition"
+        >
+          <i data-lucide="history" class="w-4 h-4"></i>
+          Execution History
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Actor Configuration & Run Card -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Input Form -->
+      <div class="lg:col-span-2 bg-[#1b1e2b] p-6 rounded-xl border border-[#262938] space-y-6">
+        <div class="flex items-center justify-between border-b border-[#262938] pb-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="sliders" class="w-4 h-4 text-[#FF7629]"></i>
+            <h3 class="font-semibold text-white text-sm">Input Parameters</h3>
+          </div>
+          <span class="text-xs text-gray-500 font-mono">JSON Schema v1</span>
+        </div>
+
+        <form id="scraper-form" class="space-y-6">
+          <!-- Facebook Group URL -->
+          <div class="space-y-2">
+            <label for="group-url" class="block text-xs font-semibold uppercase tracking-wider text-gray-300">
+              Facebook Group URL <span class="text-rose-400">*</span>
+            </label>
+            <div class="relative">
+              <input
+                type="url"
+                id="group-url"
+                name="groupUrl"
+                placeholder="https://www.facebook.com/groups/1234567890/"
+                required
+                class="w-full bg-[#12141c] border border-[#2d3143] rounded-lg px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#FF7629] transition"
+              />
+              <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500">
+                <i data-lucide="globe" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <p id="url-error" class="hidden text-xs text-rose-400 font-medium">Please enter a valid Facebook group URL (e.g. https://www.facebook.com/groups/...)</p>
+            <p class="text-[11px] text-gray-500">Supports direct group links or group ID URLs. The scraper will extract public posts chronologically.</p>
+          </div>
+
+          <!-- Post Limit Dropdown -->
+          <div class="space-y-2">
+            <label for="post-limit" class="block text-xs font-semibold uppercase tracking-wider text-gray-300">
+              Post Limit <span class="text-rose-400">*</span>
+            </label>
+            <div class="grid grid-cols-4 gap-3">
+              <label class="cursor-pointer">
+                <input type="radio" name="postLimit" value="10" checked class="peer sr-only" />
+                <div class="text-center py-2.5 rounded-lg border border-[#2d3143] peer-checked:border-[#FF7629] peer-checked:bg-[#FF7629]/10 peer-checked:text-[#FF7629] text-gray-400 text-sm font-semibold hover:border-gray-500 transition">
+                  10 posts
+                </div>
+              </label>
+
+              <label class="cursor-pointer">
+                <input type="radio" name="postLimit" value="20" class="peer sr-only" />
+                <div class="text-center py-2.5 rounded-lg border border-[#2d3143] peer-checked:border-[#FF7629] peer-checked:bg-[#FF7629]/10 peer-checked:text-[#FF7629] text-gray-400 text-sm font-semibold hover:border-gray-500 transition">
+                  20 posts
+                </div>
+              </label>
+
+              <label class="cursor-pointer">
+                <input type="radio" name="postLimit" value="50" class="peer sr-only" />
+                <div class="text-center py-2.5 rounded-lg border border-[#2d3143] peer-checked:border-[#FF7629] peer-checked:bg-[#FF7629]/10 peer-checked:text-[#FF7629] text-gray-400 text-sm font-semibold hover:border-gray-500 transition">
+                  50 posts
+                </div>
+              </label>
+
+              <label class="cursor-pointer">
+                <input type="radio" name="postLimit" value="100" class="peer sr-only" />
+                <div class="text-center py-2.5 rounded-lg border border-[#2d3143] peer-checked:border-[#FF7629] peer-checked:bg-[#FF7629]/10 peer-checked:text-[#FF7629] text-gray-400 text-sm font-semibold hover:border-gray-500 transition">
+                  100 posts
+                </div>
+              </label>
+            </div>
+            <p class="text-[11px] text-gray-500">The scraper stops immediately upon reaching the exact target post count.</p>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex items-center gap-4 pt-4 border-t border-[#262938]">
+            <button
+              type="submit"
+              id="start-btn"
+              class="flex-1 flex items-center justify-center gap-2 bg-[#FF7629] hover:bg-[#e66319] text-white py-3 rounded-lg text-sm font-semibold transition shadow-md shadow-[#FF7629]/20"
+            >
+              <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+              Start Scraping
+            </button>
+
+            <button
+              type="button"
+              id="clear-btn"
+              class="px-5 py-3 rounded-lg bg-[#252838] hover:bg-[#2e3246] text-gray-300 text-sm font-medium border border-[#31364b] transition"
+            >
+              Clear Form
+            </button>
+          </div>
+        </form>
+
+        <!-- Status Alert Box -->
+        <div id="alert-box" class="hidden p-4 rounded-lg text-xs font-medium"></div>
+      </div>
+
+      <!-- Actor Info Sidebar -->
+      <div class="space-y-6">
+        <div class="bg-[#1b1e2b] p-5 rounded-xl border border-[#262938] space-y-4">
+          <h4 class="font-semibold text-white text-sm">Actor Description</h4>
+          <p class="text-xs text-gray-300 leading-relaxed">
+            This Actor spawns an isolated background Python Chrome subprocess that navigates to the group's chronological feed, performs DOM scrolls, parses post contents, extracts image URLs, and streams records straight into PocketBase port 8092.
+          </p>
+
+          <div class="space-y-2 pt-2">
+            <div class="flex items-center gap-2 text-xs text-gray-400">
+              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+              <span>Facebook cookies kept secure in engine</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-gray-400">
+              <i data-lucide="refresh-cw" class="w-4 h-4 text-blue-400"></i>
+              <span>Deduplication against existing records</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-gray-400">
+              <i data-lucide="database" class="w-4 h-4 text-[#FF7629]"></i>
+              <span>Dedicated DB: 127.0.0.1:8092</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sample Group Helper -->
+        <div class="bg-[#1b1e2b] p-5 rounded-xl border border-[#262938] space-y-3">
+          <h4 class="font-semibold text-white text-xs uppercase tracking-wider text-gray-400">Quick Test Example</h4>
+          <p class="text-xs text-gray-400">Click to fill a known public group:</p>
+          <button
+            type="button"
+            id="fill-sample-btn"
+            class="w-full text-left p-2.5 rounded-lg bg-[#141620] hover:bg-[#202330] border border-[#262938] text-xs font-mono text-gray-300 truncate transition"
+          >
+            https://www.facebook.com/groups/torontorentals
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("scraper-form") as HTMLFormElement;
+    const urlInput = document.getElementById("group-url") as HTMLInputElement;
+    const urlError = document.getElementById("url-error");
+    const clearBtn = document.getElementById("clear-btn");
+    const startBtn = document.getElementById("start-btn");
+    const alertBox = document.getElementById("alert-box");
+    const fillSampleBtn = document.getElementById("fill-sample-btn");
+
+    fillSampleBtn?.addEventListener("click", () => {
+      urlInput.value = "https://www.facebook.com/groups/torontorentals";
+      urlError?.classList.add("hidden");
+    });
+
+    clearBtn?.addEventListener("click", () => {
+      urlInput.value = "";
+      urlError?.classList.add("hidden");
+      alertBox?.classList.add("hidden");
+    });
+
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const url = urlInput.value.trim();
+
+      // Validate URL
+      if (!url.includes("facebook.com/groups/")) {
+        urlError?.classList.remove("hidden");
+        return;
+      }
+      urlError?.classList.add("hidden");
+
+      // Get selected limit
+      const limitElement = document.querySelector('input[name="postLimit"]:checked') as HTMLInputElement;
+      const limit = parseInt(limitElement?.value || "10");
+
+      startBtn.setAttribute("disabled", "true");
+      startBtn.innerHTML = `Starting run...`;
+
+      try {
+        const res = await fetch("http://127.0.0.1:4000/api/runs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ groupUrl: url, postLimit: limit })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.runId) {
+          alertBox?.classList.remove("hidden", "bg-rose-500/10", "text-rose-400", "border-rose-500/20");
+          alertBox?.classList.add("bg-emerald-500/10", "text-emerald-400", "border", "border-emerald-500/20");
+          alertBox!.innerHTML = `Scraping run started successfully! Redirecting to live run console...`;
+
+          setTimeout(() => {
+            window.location.href = `/runs/detail?runId=${data.runId}`;
+          }, 1200);
+        } else {
+          throw new Error(data.error || "Failed to start run.");
+        }
+      } catch (err: any) {
+        alertBox?.classList.remove("hidden", "bg-emerald-500/10", "text-emerald-400", "border-emerald-500/20");
+        alertBox?.classList.add("bg-rose-500/10", "text-rose-400", "border", "border-rose-500/20");
+        alertBox!.innerText = `Error: ${err.message}`;
+        startBtn.removeAttribute("disabled");
+        startBtn.innerHTML = `Start Scraping`;
+      }
+    });
+
+    // @ts-ignore
+    if (window.lucide) window.lucide.createIcons();
+  </script>
+</DashboardLayout>
+

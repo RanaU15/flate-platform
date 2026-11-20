@@ -1,0 +1,71 @@
+---
+import DashboardLayout from "../layouts/DashboardLayout.astro";
+---
+
+<DashboardLayout title="Settings" activeNav="settings">
+  <div class="max-w-4xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="pb-4 border-b border-[#262938]">
+      <h1 class="text-xl font-bold text-white">Platform Configuration & Health</h1>
+      <p class="text-sm text-gray-400 mt-1">Status of isolated scrapers, database instances, and environment settings.</p>
+    </div>
+
+    <!-- Health Overview Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-[#1b1e2b] p-6 rounded-xl border border-[#262938] space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2">
+            <i data-lucide="database" class="w-4 h-4 text-[#FF7629]"></i>
+            PocketBase Storage Instance
+          </h3>
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-mono font-medium">Online</span>
+        </div>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          Running independently on port 8092 with dedicated data path at <code>pb_data</code>. Port 8091 is completely isolated.
+        </p>
+        <div class="space-y-2 text-xs font-mono text-gray-300 bg-[#12141c] p-3 rounded-lg border border-[#262938]">
+          <div class="flex justify-between">
+            <span class="text-gray-500">Host / Port:</span>
+            <span>127.0.0.1:8092</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">Dashboard:</span>
+            <a href="http://127.0.0.1:8092/_/" target="_blank" class="text-[#FF7629] hover:underline">Open Admin UI &rarr;</a>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">Collections:</span>
+            <span>runs, posts, run_logs</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-[#1b1e2b] p-6 rounded-xl border border-[#262938] space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-semibold text-white text-sm flex items-center gap-2">
+            <i data-lucide="cpu" class="w-4 h-4 text-[#FF7629]"></i>
+            Worker & Scraping Engine
+          </h3>
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-mono font-medium">Operational</span>
+        </div>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          Selenium WebDriver with Chrome, session cookie authentication, and live stdout log streaming.
+        </p>
+        <div class="space-y-2 text-xs font-mono text-gray-300 bg-[#12141c] p-3 rounded-lg border border-[#262938]">
+          <div class="flex justify-between">
+            <span class="text-gray-500">Backend API:</span>
+            <span>127.0.0.1:4000</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">Cookie Path:</span>
+            <span>engine/facebook-cookies.json</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">Limits Allowed:</span>
+            <span>10, 20, 50, 100</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DashboardLayout>
+

@@ -1,0 +1,211 @@
+---
+import DashboardLayout from "../layouts/DashboardLayout.astro";
+---
+
+<DashboardLayout title="Overview" activeNav="overview">
+  <div class="max-w-7xl mx-auto space-y-8">
+    <!-- Top Welcome Banner -->
+    <div class="flex items-center justify-between bg-gradient-to-r from-[#202436] to-[#181a26] p-6 rounded-xl border border-[#2b3044] shadow-sm">
+      <div class="space-y-1">
+        <h1 class="text-xl font-bold text-white flex items-center gap-2">
+          Facebook Group Scraper Platform
+          <span class="text-xs bg-[#FF7629]/20 text-[#FF7629] font-mono px-2 py-0.5 rounded border border-[#FF7629]/30">Active</span>
+        </h1>
+        <p class="text-sm text-gray-400">Apify-grade cloud automation running isolated on Port 8092 with live process supervision.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <a
+          href="/actors"
+          class="flex items-center gap-2 bg-[#FF7629] hover:bg-[#e66319] text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition shadow-md shadow-[#FF7629]/20"
+        >
+          <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+          Start Scraping Run
+        </a>
+      </div>
+    </div>
+
+    <!-- Overview Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+      <!-- Total Runs -->
+      <div class="bg-[#1b1e2b] p-5 rounded-xl border border-[#262938] hover:border-[#383d52] transition">
+        <div class="flex items-center justify-between text-gray-400 mb-3">
+          <span class="text-xs font-semibold uppercase tracking-wider">Total Runs</span>
+          <div class="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+            <i data-lucide="activity" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="text-2xl font-bold text-white" id="stat-total-runs">--</div>
+        <p class="text-xs text-gray-500 mt-1">All executed scraping jobs</p>
+      </div>
+
+      <!-- Successful Runs -->
+      <div class="bg-[#1b1e2b] p-5 rounded-xl border border-[#262938] hover:border-[#383d52] transition">
+        <div class="flex items-center justify-between text-gray-400 mb-3">
+          <span class="text-xs font-semibold uppercase tracking-wider">Successful</span>
+          <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="text-2xl font-bold text-emerald-400" id="stat-successful-runs">--</div>
+        <p class="text-xs text-gray-500 mt-1">Completed without errors</p>
+      </div>
+
+      <!-- Failed Runs -->
+      <div class="bg-[#1b1e2b] p-5 rounded-xl border border-[#262938] hover:border-[#383d52] transition">
+        <div class="flex items-center justify-between text-gray-400 mb-3">
+          <span class="text-xs font-semibold uppercase tracking-wider">Failed / Aborted</span>
+          <div class="p-2 rounded-lg bg-rose-500/10 text-rose-400">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="text-2xl font-bold text-rose-400" id="stat-failed-runs">--</div>
+        <p class="text-xs text-gray-500 mt-1">Interrupted or error jobs</p>
+      </div>
+
+      <!-- Total Posts Scraped -->
+      <div class="bg-[#1b1e2b] p-5 rounded-xl border border-[#262938] hover:border-[#383d52] transition">
+        <div class="flex items-center justify-between text-gray-400 mb-3">
+          <span class="text-xs font-semibold uppercase tracking-wider">Posts Scraped</span>
+          <div class="p-2 rounded-lg bg-[#FF7629]/10 text-[#FF7629]">
+            <i data-lucide="database" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="text-2xl font-bold text-white" id="stat-total-posts">--</div>
+        <p class="text-xs text-gray-500 mt-1">Stored in PocketBase :8092</p>
+      </div>
+    </div>
+
+    <!-- Main Grid: Recent Runs & Performance -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Recent Runs List -->
+      <div class="lg:col-span-2 bg-[#1b1e2b] rounded-xl border border-[#262938] overflow-hidden">
+        <div class="p-5 border-b border-[#262938] flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="clock" class="w-4 h-4 text-[#FF7629]"></i>
+            <h3 class="font-semibold text-white text-sm">Recent Scraping Activity</h3>
+          </div>
+          <a href="/runs" class="text-xs font-medium text-[#FF7629] hover:underline">View All Runs &rarr;</a>
+        </div>
+        
+        <div class="divide-y divide-[#262938]" id="recent-runs-list">
+          <div class="p-8 text-center text-gray-500 text-sm">Loading recent activity...</div>
+        </div>
+      </div>
+
+      <!-- Actor Quick Card & Engine Status -->
+      <div class="space-y-6">
+        <div class="bg-[#1b1e2b] p-5 rounded-xl border border-[#262938] space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-[#FF7629]/20 flex items-center justify-center text-[#FF7629]">
+              <i data-lucide="layers" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-white text-sm">Facebook Groups Scraper</h4>
+              <p class="text-xs text-gray-400">Actor v1.0.0 by DeepMind Team</p>
+            </div>
+          </div>
+          <p class="text-xs text-gray-300 leading-relaxed">
+            Extracts posts, authors, timestamps, permalinks, and image URLs from public Facebook groups using authorized session cookies and automated DOM parsing.
+          </p>
+          <div class="pt-2">
+            <a
+              href="/actors"
+              class="block w-full text-center py-2 rounded-lg bg-[#252838] hover:bg-[#2f3346] text-white text-xs font-semibold border border-[#31364b] transition"
+            >
+              Open Actor Console
+            </a>
+          </div>
+        </div>
+
+        <!-- Performance / Specifications -->
+        <div class="bg-[#1b1e2b] p-5 rounded-xl border border-[#262938] space-y-3">
+          <h4 class="font-semibold text-white text-xs uppercase tracking-wider text-gray-400">Engine Details</h4>
+          <ul class="text-xs space-y-2 text-gray-300">
+            <li class="flex items-center justify-between py-1 border-b border-[#262938]">
+              <span class="text-gray-400">Database Port</span>
+              <span class="font-mono text-emerald-400 font-medium">127.0.0.1:8092</span>
+            </li>
+            <li class="flex items-center justify-between py-1 border-b border-[#262938]">
+              <span class="text-gray-400">Deduplication</span>
+              <span class="font-medium text-white">Temporary ID Hash (MD5)</span>
+            </li>
+            <li class="flex items-center justify-between py-1 border-b border-[#262938]">
+              <span class="text-gray-400">Browser Driver</span>
+              <span class="font-medium text-white">Selenium Chrome Headless</span>
+            </li>
+            <li class="flex items-center justify-between py-1">
+              <span class="text-gray-400">Dataset Format</span>
+              <span class="font-medium text-white">CSV, JSON Export</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function loadStats() {
+      try {
+        const res = await fetch("http://127.0.0.1:4000/api/stats");
+        if (!res.ok) return;
+        const data = await res.json();
+
+        document.getElementById("stat-total-runs").innerText = data.totalRuns;
+        document.getElementById("stat-successful-runs").innerText = data.successfulRuns;
+        document.getElementById("stat-failed-runs").innerText = data.failedRuns;
+        document.getElementById("stat-total-posts").innerText = data.totalPosts;
+
+        const list = document.getElementById("recent-runs-list");
+        if (data.recentRuns && data.recentRuns.length > 0) {
+          list.innerHTML = data.recentRuns.map(run => {
+            const statusColors = {
+              completed: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+              running: "bg-blue-500/10 text-blue-400 border-blue-500/20 animate-pulse",
+              failed: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+              cancelled: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+              pending: "bg-gray-500/10 text-gray-400 border-gray-500/20"
+            };
+            const badge = statusColors[run.status] || statusColors.pending;
+
+            return `
+              <div class="p-4 flex items-center justify-between hover:bg-[#202330] transition">
+                <div class="space-y-1">
+                  <div class="flex items-center gap-2">
+                    <a href="/runs/detail?runId=${run.id}" class="text-sm font-semibold text-white hover:text-[#FF7629] font-mono">
+                      #${run.id.slice(0, 8)}
+                    </a>
+                    <span class="text-xs px-2 py-0.5 rounded-full border ${badge} capitalize font-medium">
+                      ${run.status}
+                    </span>
+                  </div>
+                  <p class="text-xs text-gray-400 truncate max-w-md">${run.group_url}</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs font-semibold text-white">${run.scraped_count || 0} / ${run.post_limit} posts</div>
+                  <div class="text-[11px] text-gray-500 font-mono">${run.duration || (run.status === 'running' ? 'In progress' : '-')}</div>
+                </div>
+              </div>
+            `;
+          }).join("");
+        } else {
+          list.innerHTML = `
+            <div class="p-8 text-center text-gray-500 text-sm space-y-2">
+              <p>No scraping runs recorded yet.</p>
+              <a href="/actors" class="inline-block text-xs text-[#FF7629] hover:underline font-semibold">Start your first run &rarr;</a>
+            </div>
+          `;
+        }
+
+        // Re-run Lucide
+        // @ts-ignore
+        if (window.lucide) window.lucide.createIcons();
+      } catch (e) {
+        console.error("Failed to load overview stats:", e);
+      }
+    }
+
+    loadStats();
+    setInterval(loadStats, 5000);
+  </script>
+</DashboardLayout>
+

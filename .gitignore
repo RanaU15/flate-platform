@@ -1,0 +1,8 @@
+node_modules/
+.astro/
+dist/
+pb_data/
+*.log
+facebook-cookies.json
+.env
+

@@ -1,0 +1,142 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+---
+
+<DashboardLayout title="Runs" activeNav="runs">
+  <div class="max-w-7xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between pb-4 border-b border-[#262938]">
+      <div>
+        <h1 class="text-xl font-bold text-white">Actor Runs</h1>
+        <p class="text-sm text-gray-400 mt-1">Live monitoring and execution log of all scraping tasks.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button
+          id="refresh-runs-btn"
+          class="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[#222534] hover:bg-[#2b2f42] text-gray-300 text-xs font-semibold border border-[#2e3347] transition"
+        >
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          Refresh
+        </button>
+        <a
+          href="/actors"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#FF7629] hover:bg-[#e66319] text-white text-xs font-semibold transition shadow-md shadow-[#FF7629]/20"
+        >
+          <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+          New Run
+        </a>
+      </div>
+    </div>
+
+    <!-- Runs Table -->
+    <div class="bg-[#1b1e2b] rounded-xl border border-[#262938] overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-[#161822] text-gray-400 uppercase tracking-wider font-semibold border-b border-[#262938]">
+            <tr>
+              <th class="py-3.5 px-4">Run ID</th>
+              <th class="py-3.5 px-4">Status</th>
+              <th class="py-3.5 px-4">Group URL / Name</th>
+              <th class="py-3.5 px-4">Limit / Scraped</th>
+              <th class="py-3.5 px-4">Started At</th>
+              <th class="py-3.5 px-4">Duration</th>
+              <th class="py-3.5 px-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#262938] text-gray-300" id="runs-table-body">
+            <tr>
+              <td colspan="7" class="py-12 text-center text-gray-500">Loading runs...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function fetchRuns() {
+      const tbody = document.getElementById("runs-table-body");
+      try {
+        const res = await fetch("http://127.0.0.1:4000/api/runs");
+        if (!res.ok) return;
+        const data = await res.json();
+        const runs = data.items || [];
+
+        if (runs.length === 0) {
+          tbody!.innerHTML = `
+            <tr>
+              <td colspan="7" class="py-12 text-center text-gray-500">
+                No runs recorded yet. <a href="/actors" class="text-[#FF7629] font-semibold hover:underline">Start a scraping run &rarr;</a>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        const statusBadges: Record<string, string> = {
+          completed: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+          running: "bg-blue-500/10 text-blue-400 border-blue-500/20 animate-pulse",
+          failed: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+          cancelled: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+          pending: "bg-gray-500/10 text-gray-400 border-gray-500/20"
+        };
+
+        tbody!.innerHTML = runs.map((r: any) => {
+          const badge = statusBadges[r.status] || statusBadges.pending;
+          const started = r.start_time ? new Date(r.start_time).toLocaleTimeString() : "-";
+          return `
+            <tr class="hover:bg-[#202330] transition">
+              <td class="py-3.5 px-4 font-mono font-semibold text-white">
+                <a href="/runs/${r.id}" class="hover:text-[#FF7629]">
+                  #${r.id.slice(0, 8)}
+                </a>
+              </td>
+              <td class="py-3.5 px-4">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[11px] font-medium capitalize ${badge}">
+                  ${r.status === 'running' ? '<span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping"></span>' : ''}
+                  ${r.status}
+                </span>
+              </td>
+              <td class="py-3.5 px-4 max-w-xs">
+                <div class="font-medium text-white truncate">${r.group_name || "Facebook Group"}</div>
+                <div class="text-[11px] text-gray-400 truncate">${r.group_url}</div>
+              </td>
+              <td class="py-3.5 px-4 font-medium">
+                <span class="text-white font-semibold">${r.scraped_count || 0}</span> / ${r.post_limit}
+              </td>
+              <td class="py-3.5 px-4 text-gray-400 font-mono">
+                ${started}
+              </td>
+              <td class="py-3.5 px-4 font-mono text-gray-400">
+                ${r.duration || (r.status === 'running' ? 'In progress' : '-')}
+              </td>
+              <td class="py-3.5 px-4 text-right space-x-2">
+                <a
+                  href="/runs/detail?runId=${r.id}"
+                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#252838] hover:bg-[#2f3346] text-white text-[11px] font-medium transition"
+                >
+                  Details
+                </a>
+                <a
+                  href="/datasets?runId=${r.id}"
+                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#252838] hover:bg-[#2f3346] text-emerald-400 text-[11px] font-medium transition"
+                >
+                  Posts
+                </a>
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        // @ts-ignore
+        if (window.lucide) window.lucide.createIcons();
+      } catch (e) {
+        console.error("Failed to load runs:", e);
+      }
+    }
+
+    fetchRuns();
+    const interval = setInterval(fetchRuns, 4000);
+    document.getElementById("refresh-runs-btn")?.addEventListener("click", fetchRuns);
+  </script>
+</DashboardLayout>

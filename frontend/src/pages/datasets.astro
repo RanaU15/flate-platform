@@ -1,0 +1,335 @@
+---
+import DashboardLayout from "../layouts/DashboardLayout.astro";
+---
+
+<DashboardLayout title="Datasets" activeNav="datasets">
+  <div class="max-w-7xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-[#262938]">
+      <div>
+        <h1 class="text-xl font-bold text-white">Extracted Facebook Posts Dataset</h1>
+        <p class="text-sm text-gray-400 mt-1">Live data view of scraped group records saved in PocketBase (:8092).</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <!-- Export buttons -->
+        <a
+          id="export-csv-btn"
+          href="http://127.0.0.1:4000/api/datasets/export?format=csv"
+          download
+          class="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[#222534] hover:bg-[#2b2f42] text-gray-200 text-xs font-semibold border border-[#2e3347] transition shadow-sm"
+        >
+          <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400"></i>
+          Export CSV
+        </a>
+
+        <a
+          id="export-json-btn"
+          href="http://127.0.0.1:4000/api/datasets/export?format=json"
+          download
+          class="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[#222534] hover:bg-[#2b2f42] text-gray-200 text-xs font-semibold border border-[#2e3347] transition shadow-sm"
+        >
+          <i data-lucide="file-code" class="w-4 h-4 text-blue-400"></i>
+          Export JSON
+        </a>
+      </div>
+    </div>
+
+    <!-- Filters & Search Toolbar -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 bg-[#1b1e2b] p-4 rounded-xl border border-[#262938]">
+      <div class="flex-1 w-full relative">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Search by post text, author name, or group name..."
+          class="w-full bg-[#12141c] border border-[#2d3143] rounded-lg pl-10 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#FF7629] transition"
+        />
+        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-500">
+          <i data-lucide="search" class="w-3.5 h-3.5"></i>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 w-full md:w-auto">
+        <span class="text-xs text-gray-400 shrink-0 font-medium" id="filter-run-badge"></span>
+        <button
+          id="clear-filter-btn"
+          class="hidden text-xs text-rose-400 hover:underline font-medium"
+        >
+          Clear Run Filter
+        </button>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="bg-[#1b1e2b] rounded-xl border border-[#262938] overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-[#161822] text-gray-400 uppercase tracking-wider font-semibold border-b border-[#262938]">
+            <tr>
+              <th class="py-3.5 px-4">Author</th>
+              <th class="py-3.5 px-4 w-1/3">Post Description</th>
+              <th class="py-3.5 px-4">Group</th>
+              <th class="py-3.5 px-4">Post ID</th>
+              <th class="py-3.5 px-4">Images</th>
+              <th class="py-3.5 px-4">Posted Date</th>
+              <th class="py-3.5 px-4 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#262938] text-gray-300" id="dataset-table-body">
+            <tr>
+              <td colspan="7" class="py-12 text-center text-gray-500">Loading dataset records...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div class="p-4 border-t border-[#262938] bg-[#161822] flex items-center justify-between text-xs text-gray-400">
+        <span id="pagination-info">Showing 0 of 0 records</span>
+        <div class="flex items-center gap-2">
+          <button
+            id="prev-page-btn"
+            disabled
+            class="px-3 py-1.5 rounded bg-[#202330] hover:bg-[#282c3c] text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
+          >
+            Previous
+          </button>
+          <span class="font-mono text-gray-300" id="current-page-num">1</span>
+          <button
+            id="next-page-btn"
+            disabled
+            class="px-3 py-1.5 rounded bg-[#202330] hover:bg-[#282c3c] text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Post Detail Modal -->
+  <div id="post-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[#1b1e2b] border border-[#2d3143] rounded-xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl">
+      <div class="p-4 border-b border-[#262938] flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="file-text" class="w-4 h-4 text-[#FF7629]"></i>
+          <h3 class="text-sm font-semibold text-white">Post Details</h3>
+        </div>
+        <button id="close-modal-btn" class="p-1 rounded text-gray-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4 overflow-y-auto text-xs text-gray-300">
+        <div>
+          <label class="text-gray-500 font-semibold block uppercase">Author</label>
+          <div class="text-sm font-medium text-white mt-1" id="modal-author">-</div>
+        </div>
+        <div>
+          <label class="text-gray-500 font-semibold block uppercase">Post Body Description</label>
+          <div class="mt-1 p-3 bg-[#12141c] rounded-lg font-sans text-xs text-gray-200 whitespace-pre-wrap max-h-60 overflow-y-auto border border-[#262938]" id="modal-body">-</div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="text-gray-500 font-semibold block uppercase">Facebook Post ID</label>
+            <div class="font-mono text-gray-300 mt-1" id="modal-post-id">-</div>
+          </div>
+          <div>
+            <label class="text-gray-500 font-semibold block uppercase">Posted At</label>
+            <div class="font-mono text-gray-300 mt-1" id="modal-posted-at">-</div>
+          </div>
+        </div>
+        <div>
+          <label class="text-gray-500 font-semibold block uppercase">Original Permalink</label>
+          <div class="mt-1 flex items-center gap-2">
+            <input type="text" id="modal-permalink" readonly class="flex-1 bg-[#12141c] border border-[#262938] rounded px-3 py-1.5 font-mono text-xs text-gray-300 select-all" />
+            <button id="copy-url-btn" class="px-3 py-1.5 rounded bg-[#252838] hover:bg-[#2f3346] text-white text-xs font-semibold">Copy</button>
+            <a id="open-fb-link" href="#" target="_blank" class="px-3 py-1.5 rounded bg-[#FF7629] text-white text-xs font-semibold flex items-center gap-1">
+              Open <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+          </div>
+        </div>
+        <div>
+          <label class="text-gray-500 font-semibold block uppercase">Extracted Images (<span id="modal-img-count">0</span>)</label>
+          <div class="mt-2 flex flex-wrap gap-2 max-h-40 overflow-y-auto p-2 bg-[#12141c] rounded border border-[#262938]" id="modal-images"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentPage = 1;
+    const perPage = 15;
+    let currentSearch = "";
+
+    // Parse URL params for run filter
+    const urlParams = new URLSearchParams(window.location.search);
+    const filterRunId = urlParams.get("runId") || "";
+
+    const tbody = document.getElementById("dataset-table-body");
+    const prevBtn = document.getElementById("prev-page-btn") as HTMLButtonElement;
+    const nextBtn = document.getElementById("next-page-btn") as HTMLButtonElement;
+    const pageNum = document.getElementById("current-page-num");
+    const pageInfo = document.getElementById("pagination-info");
+    const searchInput = document.getElementById("search-input") as HTMLInputElement;
+    const filterBadge = document.getElementById("filter-run-badge");
+    const clearFilterBtn = document.getElementById("clear-filter-btn");
+
+    const exportCsvBtn = document.getElementById("export-csv-btn") as HTMLAnchorElement;
+    const exportJsonBtn = document.getElementById("export-json-btn") as HTMLAnchorElement;
+
+    // Update export links
+    if (filterRunId) {
+      exportCsvBtn.href = `http://127.0.0.1:4000/api/datasets/export?format=csv&runId=${filterRunId}`;
+      exportJsonBtn.href = `http://127.0.0.1:4000/api/datasets/export?format=json&runId=${filterRunId}`;
+      filterBadge!.innerText = `Filtered by Run: #${filterRunId.slice(0, 8)}`;
+      clearFilterBtn?.classList.remove("hidden");
+    }
+
+    clearFilterBtn?.addEventListener("click", () => {
+      window.location.href = "/datasets";
+    });
+
+    async function fetchPosts() {
+      try {
+        let url = `http://127.0.0.1:4000/api/datasets?page=${currentPage}&perPage=${perPage}`;
+        if (filterRunId) url += `&runId=${filterRunId}`;
+        if (currentSearch) url += `&search=${encodeURIComponent(currentSearch)}`;
+
+        const res = await fetch(url);
+        if (!res.ok) return;
+        const data = await res.json();
+        const posts = data.items || [];
+
+        if (posts.length === 0) {
+          tbody!.innerHTML = `
+            <tr>
+              <td colspan="7" class="py-12 text-center text-gray-500">
+                No posts found. <a href="/actors" class="text-[#FF7629] font-semibold hover:underline">Start a scraping run &rarr;</a>
+              </td>
+            </tr>
+          `;
+          pageInfo!.innerText = "Showing 0 of 0 records";
+          prevBtn.disabled = true;
+          nextBtn.disabled = true;
+          return;
+        }
+
+        pageInfo!.innerText = `Showing ${(currentPage - 1) * perPage + 1} - ${Math.min(currentPage * perPage, data.totalItems)} of ${data.totalItems} records`;
+        pageNum!.innerText = String(currentPage);
+        prevBtn.disabled = currentPage <= 1;
+        nextBtn.disabled = currentPage >= data.totalPages;
+
+        tbody!.innerHTML = posts.map((p: any) => {
+          const bodyPreview = (p.body || "").slice(0, 140) + ((p.body || "").length > 140 ? "..." : "");
+          const images = p.image_urls || [];
+          const postedDate = p.posted_at ? new Date(p.posted_at).toLocaleDateString() : "Undated";
+
+          return `
+            <tr class="hover:bg-[#202330] transition">
+              <td class="py-3 px-4 font-semibold text-white whitespace-nowrap">
+                ${p.author || "Facebook User"}
+              </td>
+              <td class="py-3 px-4 text-gray-300 leading-relaxed font-sans">
+                ${bodyPreview}
+              </td>
+              <td class="py-3 px-4 text-gray-400 whitespace-nowrap">
+                ${p.group_name || p.group_id || "Group"}
+              </td>
+              <td class="py-3 px-4 font-mono text-[11px] text-gray-400 whitespace-nowrap">
+                ${p.facebook_post_id ? `#${p.facebook_post_id}` : '<span class="text-gray-600">Generated</span>'}
+              </td>
+              <td class="py-3 px-4 whitespace-nowrap">
+                <span class="px-2 py-0.5 rounded bg-[#252838] font-mono text-[11px] text-gray-300">
+                  ${images.length} img
+                </span>
+              </td>
+              <td class="py-3 px-4 text-gray-400 font-mono whitespace-nowrap">
+                ${postedDate}
+              </td>
+              <td class="py-3 px-4 text-right whitespace-nowrap">
+                <button
+                  onclick='openDetailModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'
+                  class="px-2.5 py-1 rounded bg-[#252838] hover:bg-[#2f3346] text-white text-[11px] font-medium transition"
+                >
+                  View
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        // @ts-ignore
+        if (window.lucide) window.lucide.createIcons();
+      } catch (e) {
+        console.error("Failed to fetch posts:", e);
+      }
+    }
+
+    prevBtn?.addEventListener("click", () => {
+      if (currentPage > 1) {
+        currentPage--;
+        fetchPosts();
+      }
+    });
+
+    nextBtn?.addEventListener("click", () => {
+      currentPage++;
+      fetchPosts();
+    });
+
+    let searchTimeout: any;
+    searchInput?.addEventListener("input", (e: any) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        currentSearch = e.target.value.trim();
+        currentPage = 1;
+        fetchPosts();
+      }, 350);
+    });
+
+    // Detail Modal Handlers
+    const modal = document.getElementById("post-modal");
+    const closeModalBtn = document.getElementById("close-modal-btn");
+    const modalAuthor = document.getElementById("modal-author");
+    const modalBody = document.getElementById("modal-body");
+    const modalPostId = document.getElementById("modal-post-id");
+    const modalPostedAt = document.getElementById("modal-posted-at");
+    const modalPermalink = document.getElementById("modal-permalink") as HTMLInputElement;
+    const modalImgCount = document.getElementById("modal-img-count");
+    const modalImages = document.getElementById("modal-images");
+    const copyUrlBtn = document.getElementById("copy-url-btn");
+    const openFbLink = document.getElementById("open-fb-link") as HTMLAnchorElement;
+
+    // @ts-ignore
+    window.openDetailModal = function(p: any) {
+      modalAuthor!.innerText = p.author || "Unknown Author";
+      modalBody!.innerText = p.body || "";
+      modalPostId!.innerText = p.facebook_post_id || p.temporary_id || "-";
+      modalPostedAt!.innerText = p.posted_at || p.scraped_at || "-";
+      modalPermalink.value = p.post_url || p.permalink || "";
+      openFbLink.href = p.post_url || p.permalink || "#";
+
+      const imgs = p.image_urls || [];
+      modalImgCount!.innerText = String(imgs.length);
+      modalImages!.innerHTML = imgs.length > 0
+        ? imgs.map((u: string) => `<a href="${u}" target="_blank" class="text-[10px] text-blue-400 hover:underline block truncate max-w-xs font-mono">${u}</a>`).join("")
+        : '<span class="text-gray-500 text-[11px]">No images attached.</span>';
+
+      modal?.classList.remove("hidden");
+    };
+
+    closeModalBtn?.addEventListener("click", () => modal?.classList.add("hidden"));
+    modal?.addEventListener("click", (e) => {
+      if (e.target === modal) modal.classList.add("hidden");
+    });
+
+    copyUrlBtn?.addEventListener("click", () => {
+      navigator.clipboard.writeText(modalPermalink.value);
+      copyUrlBtn.innerText = "Copied!";
+      setTimeout(() => (copyUrlBtn.innerText = "Copy"), 2000);
+    });
+
+    fetchPosts();
+  </script>
+</DashboardLayout>
+
